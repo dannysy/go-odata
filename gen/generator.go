@@ -165,11 +165,17 @@ func (g *Generator) generateComplexTypes(schema descriptor.Schema) {
 }
 
 func (g *Generator) generateEntityTypes(schema descriptor.Schema) {
+	allTypes := map[string]descriptor.EntityType{}
 	entityNamesDeclarationBuf := new(bytes.Buffer)
 	P(entityNamesDeclarationBuf, "var EntityNames = struct {")
 	entityNamesAssignmentBuf := new(bytes.Buffer)
 	entityPropertyNamesBuf := new(bytes.Buffer)
 	entityNavNamesBuf := new(bytes.Buffer)
+
+	for _, entityType := range schema.EntityTypes {
+		allTypes[schema.Namespace+"."+entityType.Name] = entityType
+	}
+
 	for _, entityType := range schema.EntityTypes {
 		entityPropertyNamesDeclarationBuf := new(bytes.Buffer)
 		entityPropertyNamesAssignmentBuf := new(bytes.Buffer)
@@ -191,6 +197,21 @@ func (g *Generator) generateEntityTypes(schema descriptor.Schema) {
 		//
 		// entity structs
 		P(g.entityBuf, "type ", ToUpperFirstChar(entityType.Name), " struct {")
+		if entityType.BaseType != "" {
+			baseType := allTypes[entityType.BaseType]
+			// embedding base type
+			P(g.entityBuf, baseType.Name)
+			// embed base type property names
+			for _, property := range baseType.Properties {
+				P(entityPropertyNamesDeclarationBuf, ToUpperFirstChar(property.Name), " string")
+				P(entityPropertyNamesAssignmentBuf, ToUpperFirstChar(property.Name), ": \"", property.Name, "\",")
+			}
+			// embed base type nav property names
+			for _, navProp := range baseType.NavigationProperties {
+				P(entityNavNamesDeclarationBuf, ToUpperFirstChar(navProp.Name), " string")
+				P(entityNavNamesAssignmentBuf, ToUpperFirstChar(navProp.Name), ": \"", navProp.Name, "\",")
+			}
+		}
 		for _, property := range entityType.Properties {
 			// entity property names
 			P(entityPropertyNamesDeclarationBuf, ToUpperFirstChar(property.Name), " string")

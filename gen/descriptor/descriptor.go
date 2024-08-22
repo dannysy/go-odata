@@ -32,6 +32,7 @@ type Property struct {
 type EntityType struct {
 	XMLName              xml.Name             `xml:"EntityType"`
 	Name                 string               `xml:"Name,attr"`
+	BaseType             string               `xml:"BaseType,attr"`
 	Key                  Key                  `xml:"Key"`
 	Properties           []Property           `xml:"Property"`
 	NavigationProperties []NavigationProperty `xml:"NavigationProperty"`
