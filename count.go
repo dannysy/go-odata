@@ -18,3 +18,7 @@ func NewCount(withResult bool) *Count {
 func (c *Count) CollectToString() string {
 	return fmt.Sprintf("%s=%s", countKey, strconv.FormatBool(c.withResult))
 }
+
+func TotalCount(entityName string) string {
+	return fmt.Sprintf("%s/$count", entityName)
+}
