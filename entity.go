@@ -15,8 +15,10 @@ type builder struct {
 	entity *Entity
 }
 
-func NewEntityBuilder(name string) EntityBuilder {
-	return newBuilder(name)
+func NewEntityBuilder(id, name string) EntityBuilder {
+	b := newBuilder(name)
+	b.entity.id = id
+	return b
 }
 
 func NewListBuilder(name string) ListBuilder {
@@ -26,11 +28,6 @@ func NewListBuilder(name string) ListBuilder {
 func NewCountBuilder(name string) CountBuilder {
 	b := newBuilder(name)
 	b.entity.shouldCount = true
-	return b
-}
-
-func (b *builder) WithId(id string) EntityBuilder {
-	b.entity.id = id
 	return b
 }
 

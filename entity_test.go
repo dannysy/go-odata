@@ -8,7 +8,7 @@ import (
 )
 
 func TestShouldBuildCorrectEntityStatement(t *testing.T) {
-	entity := NewEntityBuilder("Products").WithId("1").
+	entity := NewEntityBuilder("1", "Products").
 		WithSelect(
 			NewSelect("id", "name"),
 		).

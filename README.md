@@ -15,12 +15,20 @@ import (
 )
 
 func main() {
-    entity := NewEntityBuilder("Products")
+    // Если необходимо получить сущность по идентификатору
+    // Для такой операции возможно использование опций select и expand
+    entity := NewEntityBuilder("1","Products")
+    // Если необходимо получить множество сущностей
+    // Для такой операции возможно использование всех опций
+    entity = NewListBuilder("Products")
+    // Если необходимо получить количество сущностей
+    // Для такой операции возможно использование опции filter
+    entity = NewCountBuilder("Products")
 }
 ```
 Затем можно добавить параметры запроса, используя методы объекта построителя:
 ```go
-entity.WithId("1").
+entity.
     With(
         NewSelect("id", "name"),
         NewExpandBuilder().With("category", NewSelect("id", "name")).Build(),

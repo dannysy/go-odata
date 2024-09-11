@@ -17,7 +17,6 @@ type ListBuilder interface {
 }
 
 type EntityBuilder interface {
-	WithId(id string) EntityBuilder
 	WithSelect(s *Select) EntityBuilder
 	WithExpand(e *Expand) EntityBuilder
 	Builder
