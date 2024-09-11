@@ -5,44 +5,70 @@ import (
 )
 
 type Entity struct {
-	name       string
-	id         string
-	operations []CollectableToString
+	name        string
+	id          string
+	shouldCount bool
+	operations  []CollectableToString
 }
 
-type EntityBuilder struct {
-	e *Entity
+type builder struct {
+	entity *Entity
 }
 
-func NewEntityBuilder(name string) *EntityBuilder {
-	return &EntityBuilder{
-		e: &Entity{
-			name:       name,
-			operations: make([]CollectableToString, 0, 4),
-		},
-	}
+func NewEntityBuilder(name string) EntityBuilder {
+	return newBuilder(name)
 }
 
-func (b *EntityBuilder) With(ops ...CollectableToString) *EntityBuilder {
-	b.e.operations = append(b.e.operations, ops...)
+func NewListBuilder(name string) ListBuilder {
+	return newBuilder(name)
+}
+
+func NewCountBuilder(name string) CountBuilder {
+	b := newBuilder(name)
+	b.entity.shouldCount = true
 	return b
 }
 
-func (b *EntityBuilder) WithId(id string) *EntityBuilder {
-	b.e.id = id
+func (b *builder) WithId(id string) EntityBuilder {
+	b.entity.id = id
 	return b
-
 }
 
-func (b *EntityBuilder) Build() *Entity {
-	return b.e
+func (b *builder) With(ops ...CollectableToString) ListBuilder {
+	b.entity.operations = append(b.entity.operations, ops...)
+	return b
+}
+
+func (b *builder) WithSelect(s *Select) EntityBuilder {
+	b.With(s)
+	return b
+}
+
+func (b *builder) WithExpand(expand *Expand) EntityBuilder {
+	b.With(expand)
+	return b
+}
+
+func (b *builder) WithFilter(filter *Filter) CountBuilder {
+	b.With(filter)
+	return b
+}
+
+func (b *builder) Build() *Entity {
+	return b.entity
 }
 
 func (e *Entity) CollectToString() string {
 	sb := strings.Builder{}
 	sb.WriteString(e.name)
+
+	// Id can be requested only with $select & $expand
 	if e.id != "" {
 		sb.WriteString("(" + e.id + ")")
+	}
+	// Number of items can be requested only with $filter
+	if e.shouldCount {
+		sb.WriteString("/$count")
 	}
 	sb.WriteString("?")
 	for i, op := range e.operations {
@@ -52,4 +78,13 @@ func (e *Entity) CollectToString() string {
 		sb.WriteString(op.CollectToString())
 	}
 	return sb.String()
+}
+
+func newBuilder(name string) *builder {
+	return &builder{
+		entity: &Entity{
+			name:       name,
+			operations: make([]CollectableToString, 0, 4),
+		},
+	}
 }
